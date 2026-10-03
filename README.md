@@ -32,12 +32,21 @@ Other models should work without changes: unknown parameters become a `binary_se
 - The integration ships its own icon and logo (`brand/`), shown by Home Assistant 2026.3 or later.
 - `iot_class: cloud_polling`: without internet access, control from Home Assistant stops (the physical panel keeps working).
 
+## Known limitations
+
+These come from the device firmware, not the integration:
+
+- **Target temperature set on the physical panel is not reported to the cloud.** Setting it from Home Assistant (or the app) works and shows on the panel. But if you change it with the panel's +/- buttons, Home Assistant keeps showing the last value set remotely. The panel also keeps counting from its own last value: with the panel at 29 and a remote change to 27, pressing + on the panel jumps to 30, not 28. The official app behaves the same way.
+- **Heater state right after turning it off on the panel** may still show as on for a while: after switching off, the heater cools down first (`Refrigerando`). This is still being investigated.
+
 ## Roadmap
 
 - [ ] Local control (`esp_local_ctrl` over mDNS `_esp_local_ctrl._tcp`, Security 1 using the POP fetched from the cloud), with the cloud only as a fallback.
 - [ ] Configurable polling interval.
 
 ## Tools
+
+`tools/sinapse_setpoint_probe.py` watches the heater params in the cloud every 5 s and can write a setpoint first, to check how the firmware handles it.
 
 `tools/sinapse_discovery.py` logs in, lists the nodes on the account and prints every parameter. It is read-only and useful for mapping new models. The JSON file it writes contains the local-control POP, so don't publish it.
 
