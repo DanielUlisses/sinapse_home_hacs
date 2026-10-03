@@ -1,45 +1,52 @@
-# Sinapse Home para Home Assistant
+# Sinapse Home for Home Assistant
 
-Integração (custom component, instalável via HACS) para aquecedores e controladores de spa/hidromassagem da **Sinapse Industrial** que usam o app **Sinapse Home**.
+A custom integration, installable through HACS, for **Sinapse Industrial** spa and hot tub heaters and controllers that use the **Sinapse Home** app.
 
-O app Sinapse Home é uma versão com a marca da Sinapse do ESP RainMaker, da Espressif. Esta integração fala com a mesma API de nuvem que o app usa, com o login da sua conta.
+The Sinapse Home app is a Sinapse-branded build of Espressif's ESP RainMaker. This integration talks to the same cloud API the app uses, logging in with your account.
 
-## Entidades
+## Entities
 
-As entidades são criadas a partir da configuração que o próprio equipamento informa. Num **Sense Duo**:
+Entities are created from the configuration the device itself reports. On a **Sense Duo**, the app's devices map like this (device and parameter names are the Portuguese ones the device reports):
 
-| Equipamento no app | Entidade no HA |
+| Device in the app | Home Assistant entity |
 |---|---|
-| Painel, Hidro 1, Borbulhador | `switch` |
-| Aquecedor | `climate` (temperatura programada 20–40 °C, ação aquecendo/ociosa) |
-| Aquecedor · Temperatura | `sensor` (°C, com histórico) |
-| Aquecedor · Status / Nível / Refrigerando | `binary_sensor` |
-| Cromoterapia | `light` (liga/desliga, brilho, cor HS) |
-| Cromoterapia · Efeitos | `button` (avança o efeito) |
+| Painel (panel), Hidro 1 (jet pump), Borbulhador (air blower) | `switch` |
+| Aquecedor (heater) | `climate` (target temperature 20–40 °C, heating/idle action) |
+| Aquecedor · Temperatura | `sensor` (°C, with history) |
+| Aquecedor · Status / Nível (water level) / Refrigerando (cooling) | `binary_sensor` |
+| Cromoterapia (chromotherapy lights) | `light` (on/off, brightness, HS color) |
+| Cromoterapia · Efeitos | `button` (advances to the next light effect) |
 
-Outros modelos devem funcionar sem mudanças: parâmetros desconhecidos viram `binary_sensor`, `sensor` ou `button` conforme o tipo.
+Other models should work without changes: unknown parameters become a `binary_sensor`, `sensor` or `button` depending on their type.
 
-## Instalação
+## Installation
 
-1. HACS → menu ⋮ → **Repositórios personalizados** → `https://github.com/DanielUlisses/sinapse_home_hacs`, categoria **Integração**.
-2. Instale **Sinapse Home** e reinicie o Home Assistant.
-3. **Configurações → Dispositivos e serviços → Adicionar integração → Sinapse Home**, com o mesmo e-mail e senha do app.
+1. HACS → ⋮ menu → **Custom repositories** → `https://github.com/DanielUlisses/sinapse_home_hacs`, category **Integration**.
+2. Install **Sinapse Home** and restart Home Assistant.
+3. **Settings → Devices & services → Add integration → Sinapse Home**, using the same e-mail and password as the app.
 
-## Funcionamento
+## How it works
 
-- Polling na nuvem a cada 30 s. Depois de um comando, o estado muda na hora e é confirmado com uma nova leitura 3 s depois.
-- Sessão renovada automaticamente com o refresh token. Se a senha mudar, o HA pede reautenticação.
-- `iot_class: cloud_polling`: sem internet, o controle pelo HA para (o painel físico continua funcionando).
+- The cloud is polled every 30 s. After a command, the state updates immediately and is confirmed by a new poll 3 s later.
+- The session is renewed automatically with the refresh token. If your password changes, Home Assistant asks you to re-authenticate.
+- `iot_class: cloud_polling`: without internet access, control from Home Assistant stops (the physical panel keeps working).
 
 ## Roadmap
 
-- [ ] Controle local (`esp_local_ctrl` via mDNS `_esp_local_ctrl._tcp`, Security 1 com o POP obtido da nuvem), usando a nuvem só como fallback.
-- [ ] Opção de intervalo de polling.
+- [ ] Local control (`esp_local_ctrl` over mDNS `_esp_local_ctrl._tcp`, Security 1 using the POP fetched from the cloud), with the cloud only as a fallback.
+- [ ] Configurable polling interval.
 
-## Ferramentas
+## Tools
 
-`tools/sinapse_discovery.py` faz login, lista os nodes da conta e mostra todos os parâmetros (somente leitura). Útil para mapear modelos novos. O JSON gerado contém o POP de controle local, então não publique.
+`tools/sinapse_discovery.py` logs in, lists the nodes on the account and prints every parameter. It is read-only and useful for mapping new models. The JSON file it writes contains the local-control POP, so don't publish it.
 
-## Aviso
+## Development
 
-Projeto independente, sem relação com a Sinapse Industrial ou a Espressif. Use por sua conta e risco.
+```bash
+pip install -r requirements_test.txt
+pytest
+```
+
+## Disclaimer
+
+Independent project, not affiliated with Sinapse Industrial or Espressif. Use at your own risk.

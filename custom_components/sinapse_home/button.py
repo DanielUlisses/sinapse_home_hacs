@@ -1,4 +1,4 @@
-"""Buttons: write-only boolean params (e.g. Cromoterapia 'Efeitos' = next effect)."""
+"""Buttons for write-only boolean params (e.g. next chromotherapy effect)."""
 from __future__ import annotations
 
 from homeassistant.components.button import ButtonEntity

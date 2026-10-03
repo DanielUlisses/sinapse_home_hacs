@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Sinapse Home (ESP RainMaker white-label) discovery.
+"""Sinapse Home (white-label ESP RainMaker) discovery.
 
-Faz login na nuvem da Sinapse, lista os nodes (spas/aquecedores) e salva
-config + params de cada um em sinapse_nodes.json, para mapear as entidades
-do futuro custom component do Home Assistant.
+Logs in to the Sinapse cloud, lists the nodes (spas/heaters) and saves the
+config and params of each one to sinapse_nodes.json, to map the entities
+of the Home Assistant integration.
 
-Uso:
-    python3 sinapse_discovery.py            # pede e-mail e senha
+Usage:
+    python3 sinapse_discovery.py            # prompts for e-mail and password
     SINAPSE_USER=... SINAPSE_PASS=... python3 sinapse_discovery.py
 
-Só usa a biblioteca padrão. Nenhuma alteração é feita no equipamento.
-Atenção: o JSON gerado pode conter o POP de controle local; não publique.
+Standard library only. Nothing is changed on the device.
+Warning: the generated JSON may contain the local-control POP; don't publish it.
 """
 import getpass
 import json
@@ -35,8 +35,8 @@ def call(method, path, token=None, body=None, query=None):
 
 
 def main():
-    user = os.environ.get("SINAPSE_USER") or input("E-mail Sinapse Home: ")
-    pwd = os.environ.get("SINAPSE_PASS") or getpass.getpass("Senha: ")
+    user = os.environ.get("SINAPSE_USER") or input("Sinapse Home e-mail: ")
+    pwd = os.environ.get("SINAPSE_PASS") or getpass.getpass("Password: ")
 
     login = call("POST", "login", body={"user_name": user, "password": pwd})
     token = login["accesstoken"]
@@ -53,13 +53,13 @@ def main():
         if not start:
             break
 
-    print(f"{len(nodes)} node(s) encontrado(s)\n")
+    print(f"{len(nodes)} node(s) found\n")
     for n in nodes:
         cfg = n.get("config", {})
         info = cfg.get("info", {})
         online = n.get("status", {}).get("connectivity", {}).get("connected")
-        print(f"- node_id={n['id']}  nome={info.get('name')}  "
-              f"tipo={info.get('type')}  fw={info.get('fw_version')}  online={online}")
+        print(f"- node_id={n['id']}  name={info.get('name')}  "
+              f"type={info.get('type')}  fw={info.get('fw_version')}  online={online}")
         for dev in cfg.get("devices", []):
             print(f"    device '{dev['name']}' ({dev.get('type')})")
             for p in dev.get("params", []):
@@ -68,11 +68,11 @@ def main():
                       f"{p.get('data_type',''):<6} {','.join(p.get('properties', []))} {bounds}")
         for svc in cfg.get("services", []):
             print(f"    service '{svc['name']}' ({svc.get('type')})")
-        print(f"    valores atuais: {json.dumps(n.get('params', {}), ensure_ascii=False)}\n")
+        print(f"    current values: {json.dumps(n.get('params', {}), ensure_ascii=False)}\n")
 
     with open("sinapse_nodes.json", "w") as f:
         json.dump(nodes, f, indent=2, ensure_ascii=False)
-    print("Detalhes completos salvos em sinapse_nodes.json")
+    print("Full details saved to sinapse_nodes.json")
 
 
 if __name__ == "__main__":

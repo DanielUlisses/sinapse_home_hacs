@@ -1,4 +1,4 @@
-"""Climate: Aquecedor (any esp.device.thermostat)."""
+"""Climate for esp.device.thermostat devices (spa water heater)."""
 from __future__ import annotations
 
 from typing import Any

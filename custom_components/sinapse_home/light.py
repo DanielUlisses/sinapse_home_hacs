@@ -1,4 +1,4 @@
-"""Light: Cromoterapia (any esp.device.light)."""
+"""Light for esp.device.light devices (chromotherapy spots)."""
 from __future__ import annotations
 
 from typing import Any

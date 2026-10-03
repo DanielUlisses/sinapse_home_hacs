@@ -1,4 +1,4 @@
-"""Switches: Painel, Hidro, Borbulhador (any esp.device.switch)."""
+"""Switches for esp.device.switch devices (panel, jet pumps, air blower)."""
 from __future__ import annotations
 
 from typing import Any
