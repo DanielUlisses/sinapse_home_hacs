@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Sinapse Home",
+        "description": "Use the same e-mail and password as the Sinapse Home app.",
+        "data": { "username": "E-mail", "password": "Password" }
+      },
+      "reauth_confirm": {
+        "title": "Sinapse Home",
+        "description": "The session expired. Enter your Sinapse Home password again.",
+        "data": { "password": "Password" }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid e-mail or password.",
+      "cannot_connect": "Could not reach the Sinapse cloud."
+    },
+    "abort": {
+      "already_configured": "This account is already configured.",
+      "reauth_successful": "Re-authentication successful."
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "domain": "sinapse_home",
+  "name": "Sinapse Home",
+  "codeowners": ["@DanielUlisses"],
+  "config_flow": true,
+  "documentation": "https://github.com/DanielUlisses/sinapse_home_hacs",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/DanielUlisses/sinapse_home_hacs/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
