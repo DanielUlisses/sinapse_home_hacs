@@ -29,6 +29,7 @@ Other models should work without changes: unknown parameters become a `binary_se
 
 - The cloud is polled every 30 s. After a command, the state updates immediately and is confirmed by a new poll 3 s later.
 - The session is renewed automatically with the refresh token. If your password changes, Home Assistant asks you to re-authenticate.
+- The integration ships its own icon and logo (`brand/`), shown by Home Assistant 2026.3 or later.
 - `iot_class: cloud_polling`: without internet access, control from Home Assistant stops (the physical panel keeps working).
 
 ## Roadmap
