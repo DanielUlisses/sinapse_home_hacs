@@ -51,3 +51,7 @@ pytest
 ## Disclaimer
 
 Independent project, not affiliated with Sinapse Industrial or Espressif. Use at your own risk.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
