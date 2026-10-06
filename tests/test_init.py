@@ -30,6 +30,7 @@ async def test_entities_created(hass: HomeAssistant, mock_api) -> None:
         "switch.sense_duo_borbulhador",
         "climate.sense_duo_aquecedor",
         "sensor.sense_duo_aquecedor_temperatura",
+        "sensor.sense_duo_aquecedor_temperatura_alvo",
         "binary_sensor.sense_duo_aquecedor_status",
         "binary_sensor.sense_duo_aquecedor_nivel",
         "binary_sensor.sense_duo_aquecedor_refrigerando",
@@ -44,6 +45,7 @@ async def test_entities_created(hass: HomeAssistant, mock_api) -> None:
     assert climate.attributes["hvac_action"] == "heating"
     assert climate.attributes["min_temp"] == 20 and climate.attributes["max_temp"] == 40
     assert hass.states.get("sensor.sense_duo_aquecedor_temperatura").state == "31.5"
+    assert hass.states.get("sensor.sense_duo_aquecedor_temperatura_alvo").state == "36"
     assert hass.states.get("switch.sense_duo_painel").state == "on"
     assert hass.states.get("light.sense_duo_cromoterapia").state == "off"
 
@@ -59,6 +61,7 @@ async def test_commands(hass: HomeAssistant, mock_api) -> None:
     await hass.services.async_call("climate", "set_temperature",
         {"entity_id": "climate.sense_duo_aquecedor", "temperature": 38}, blocking=True)
     sp.assert_awaited_with("node1", {"Aquecedor": {"Temperatura programada": 38}})
+    assert hass.states.get("sensor.sense_duo_aquecedor_temperatura_alvo").state == "38"  # optimistic
 
     await hass.services.async_call("light", "turn_on",
         {"entity_id": "light.sense_duo_cromoterapia", "hs_color": [240, 80], "brightness": 128}, blocking=True)
