@@ -18,7 +18,18 @@
     },
     "abort": {
       "already_configured": "This account is already configured.",
-      "reauth_successful": "Re-authentication successful."
+      "reauth_successful": "Re-authentication successful.",
+      "not_rainmaker_node": "The discovered device is not an ESP RainMaker node.",
+      "not_configured": "Add the Sinapse Home account first; local control is then used automatically."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Local control",
+        "description": "The spa is found on the local network automatically (mDNS). If mDNS doesn't reach Home Assistant (VLANs, for example), enter the controller's IP address. Leave the host empty to use automatic discovery.",
+        "data": { "host": "Host (IP address)", "port": "Port" }
+      }
     }
   }
 }

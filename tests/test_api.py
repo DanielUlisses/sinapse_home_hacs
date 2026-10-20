@@ -28,3 +28,15 @@ async def test_login_then_renew_on_401(hass: HomeAssistant, aioclient_mock: Aioh
     login_bodies = [c[2] for c in aioclient_mock.mock_calls if str(c[1]).endswith("/login")]
     assert login_bodies[0] == {"user_name": "u", "password": "p"}
     assert login_bodies[1] == {"user_name": "u", "refreshtoken": "rt"}
+
+
+async def test_timeout_is_an_api_error(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) -> None:
+    import pytest
+
+    from custom_components.sinapse_home.api import SinapseError
+
+    aioclient_mock.post(f"{BASE_URL}/login", json={"accesstoken": "tok"})
+    aioclient_mock.get(f"{BASE_URL}/user/nodes", exc=TimeoutError())
+    api = SinapseApi(async_get_clientsession(hass), "u", "p")
+    with pytest.raises(SinapseError):
+        await api.get_nodes()

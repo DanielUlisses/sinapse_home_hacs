@@ -27,19 +27,25 @@ Other models should work without changes: unknown parameters become a `binary_se
 
 ## How it works
 
-- The cloud is polled every 30 s. After a command, the state updates immediately and is confirmed by a new poll 3 s later.
+- **Local control first.** Like the app on the home Wi-Fi, the integration talks to the spa controller directly over the LAN (ESP local control, Security 1, with the proof of possession the cloud supplies). The controller is found over mDNS (`_esp_local_ctrl._tcp`); if mDNS doesn't reach Home Assistant (VLANs, for example), set its IP address in the integration's options. While the LAN path works, params are polled every 5 s and commands go straight to the controller.
+- **Cloud fallback.** The cloud login stays: it supplies the node configuration and the local-control credentials, refreshed every 30 min. After 3 failed local polls, or a local command that certainly didn't reach the spa (no connection, session refused), the integration falls back to the cloud (polled every 30 s) and retries the LAN on every poll. A command that got no answer raises an error and is not sent through the cloud (see below). The diagnostic sensor **Connection** shows `local` or `cloud`.
+- After a command, the state updates immediately and is confirmed by a new poll 3 s later.
 - The session is renewed automatically with the refresh token. If your password changes, Home Assistant asks you to re-authenticate.
 - The integration ships its own icon and logo (`brand/`), shown by Home Assistant 2026.3 or later.
-- `iot_class: cloud_polling`: without internet access, control from Home Assistant stops (the physical panel keeps working).
+- `iot_class: local_polling`: without internet access, Home Assistant keeps reading and controlling the spa over the LAN. The last good node configuration, local-control credentials (POP) and LAN address are kept in the integration's config entry (next to the account password), so Home Assistant can also start while the internet is down, as long as the spa answers on the LAN.
+- **Commands are never sent twice.** If a command sent over the LAN gets no answer (a timeout, or the connection drops after it was sent), the spa may or may not have applied it, so the integration reports an error instead of resending it locally or through the cloud: some commands, like the light-effect button, would act twice. It falls back to the cloud only when the LAN command certainly wasn't processed (no connection, session refused). This is stricter than the app, which resends through the cloud on any local failure.
+- Diagnostics (Settings → Devices & services → Sinapse Home → Download diagnostics) redact the e-mail, the password and the local-control POP.
 
 ## Roadmap
 
-- [ ] Local control (`esp_local_ctrl` over mDNS `_esp_local_ctrl._tcp`, Security 1 using the POP fetched from the cloud), with the cloud only as a fallback.
+- [x] Local control (`esp_local_ctrl` over mDNS `_esp_local_ctrl._tcp`, Security 1 using the POP fetched from the cloud), with the cloud only as a fallback.
 - [ ] Configurable polling interval.
 
 ## Tools
 
 `tools/sinapse_discovery.py` logs in, lists the nodes on the account and prints every parameter. It is read-only and useful for mapping new models. The JSON file it writes contains the local-control POP, so don't publish it.
+
+`tools/sinapse_local_probe.py` logs in to get the node id and POP, finds the controller over mDNS (or `--host`), runs the local-control handshake and prints the `config` and `params` properties with the POP redacted. `--watch 120` prints every local param change for 2 minutes (handy to time how fast panel changes show up), and `--set '{"Cromoterapia": {"Status": true}}'` writes one param. It needs `cryptography` and is read-only unless `--set` is given.
 
 ## Development
 

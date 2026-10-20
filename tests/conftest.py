@@ -1,8 +1,11 @@
 """Shared fixtures."""
+from collections.abc import AsyncGenerator
 import copy
 from unittest.mock import AsyncMock, patch
 
 import pytest
+
+from .fake_device import FakeDevice
 
 pytest_plugins = "pytest_homeassistant_custom_component"
 
@@ -57,6 +60,18 @@ NODE = {
         "Painel": {"ID": "Painel SPA", "Status": True},
     },
 }
+
+
+POP = NODE["params"]["Local Control"]["POP"]
+
+
+@pytest.fixture
+async def device(socket_enabled) -> AsyncGenerator[FakeDevice]:
+    """A node answering local control on 127.0.0.1 with the cloud POP."""
+    dev = FakeDevice(POP, NODE["params"])
+    await dev.start()
+    yield dev
+    await dev.stop()
 
 
 @pytest.fixture(autouse=True)
