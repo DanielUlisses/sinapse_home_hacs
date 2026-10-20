@@ -1,4 +1,4 @@
-"""Buttons for write-only boolean params (e.g. next chromotherapy effect)."""
+"""Buttons for write-only boolean params."""
 from __future__ import annotations
 
 from homeassistant.components.button import ButtonEntity
@@ -23,7 +23,11 @@ async def async_setup_entry(
 
 
 class SinapseButton(SinapseEntity, ButtonEntity):
-    """Pulse a write-only bool param."""
+    """Toggle a write-only bool param.
+
+    The device still reports the current value, and the app writes its inverse
+    (a toggle, not a pulse), so do the same.
+    """
 
     def __init__(self, coordinator, node_id, device, param) -> None:
         super().__init__(
@@ -32,4 +36,4 @@ class SinapseButton(SinapseEntity, ButtonEntity):
         self._param = param
 
     async def async_press(self) -> None:
-        await self._write({self._param["name"]: True})
+        await self._write({self._param["name"]: not self._value(self._param)})
