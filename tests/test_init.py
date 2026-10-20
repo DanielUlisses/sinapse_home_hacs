@@ -36,6 +36,7 @@ async def test_entities_created(hass: HomeAssistant, mock_api) -> None:
         "binary_sensor.sense_duo_aquecedor_refrigerando",
         "light.sense_duo_cromoterapia",
         "button.sense_duo_cromoterapia_efeitos",
+        "sensor.sense_duo_connection",
     ])
 
     climate = hass.states.get("climate.sense_duo_aquecedor")
@@ -48,6 +49,7 @@ async def test_entities_created(hass: HomeAssistant, mock_api) -> None:
     assert hass.states.get("sensor.sense_duo_aquecedor_temperatura_alvo").state == "36"
     assert hass.states.get("switch.sense_duo_painel").state == "on"
     assert hass.states.get("light.sense_duo_cromoterapia").state == "off"
+    assert hass.states.get("sensor.sense_duo_connection").state == "cloud"  # no LAN address
 
 
 async def test_commands(hass: HomeAssistant, mock_api) -> None:
