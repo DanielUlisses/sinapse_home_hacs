@@ -1,6 +1,6 @@
-# 0002 — Local control (LAN) with cloud fallback
+# 0002: Local control (LAN) with cloud fallback
 
-**Status:** ready to implement (needs a host on the same LAN as the spa)
+**Status:** open
 **Area:** new `local.py`, `coordinator.py`, `__init__.py`, `manifest.json`, tests, new tool
 
 ## Goal

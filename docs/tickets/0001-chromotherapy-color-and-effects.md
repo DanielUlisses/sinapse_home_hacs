@@ -1,6 +1,6 @@
-# 0001 — Chromotherapy: color picker and effects
+# 0001: Chromotherapy: color picker and effects
 
-**Status:** ready to implement (needs device access to confirm behaviour)
+**Status:** open
 **Area:** `light.py`, `button.py`, tests
 
 ## Goal
