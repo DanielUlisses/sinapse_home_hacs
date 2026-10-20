@@ -169,9 +169,14 @@ async def _discover(hass: HomeAssistant, port: int) -> None:
     )
 
 
-async def _press_efeitos(hass: HomeAssistant) -> None:
+EFFECT_WRITE = {"Cromoterapia": {"Status": True, "Efeitos": False}}
+
+
+async def _set_effect(hass: HomeAssistant) -> None:
+    """A non-idempotent write: the chromotherapy effect (Efeitos True -> False)."""
     await hass.services.async_call(
-        "button", "press", {"entity_id": "button.sense_duo_cromoterapia_efeitos"}, blocking=True
+        "light", "turn_on",
+        {"entity_id": "light.sense_duo_cromoterapia", "effect": "Solid"}, blocking=True,
     )
 
 
@@ -224,8 +229,8 @@ async def test_ambiguous_local_write_is_not_resent(
     await _setup(hass, device)
     device.drop_response_after_apply = True
     with pytest.raises(HomeAssistantError):
-        await _press_efeitos(hass)
-    assert device.writes == [{"Cromoterapia": {"Efeitos": True}}]  # applied once
+        await _set_effect(hass)
+    assert device.writes == [EFFECT_WRITE]  # applied once
     mock_api["set_params"].assert_not_awaited()
 
 
@@ -235,7 +240,7 @@ async def test_write_refused_by_the_device_is_reported_not_resent(
     await _setup(hass, device)
     device.set_statuses = [4]  # InvalidArgument
     with pytest.raises(HomeAssistantError):
-        await _press_efeitos(hass)
+        await _set_effect(hass)
     assert device.writes == []
     mock_api["set_params"].assert_not_awaited()
     assert _connection(hass) == "local"
@@ -334,8 +339,8 @@ async def test_undecodable_local_write_reply_is_not_resent(
     await _setup(hass, device)
     device.garble_set_reply = True
     with pytest.raises(HomeAssistantError):
-        await _press_efeitos(hass)
-    assert device.writes == [{"Cromoterapia": {"Efeitos": True}}]
+        await _set_effect(hass)
+    assert device.writes == [EFFECT_WRITE]
     mock_api["set_params"].assert_not_awaited()
 
 

@@ -29,11 +29,12 @@ P_TOGGLE = "esp.ui.toggle"
 
 # Sinapse custom params
 P_COOLING = "parametro_refrigerando"
+P_EFFECT = "parametro_avanca_cromo"  # chromotherapy effect toggle (write-only bool, value still reported)
 
 # Params consumed by a dedicated entity (light/climate/switch) instead of the generic ones.
 HANDLED_BY_DEVICE = {
     DEV_SWITCH: {P_POWER},
-    DEV_LIGHT: {P_POWER, P_BRIGHTNESS, P_HUE, P_SATURATION},
+    DEV_LIGHT: {P_POWER, P_BRIGHTNESS, P_HUE, P_SATURATION, P_EFFECT},
     DEV_THERMOSTAT: {P_SETPOINT, P_AC_MODE, P_POWER},
 }
 
