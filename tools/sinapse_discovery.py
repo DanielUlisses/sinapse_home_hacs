@@ -65,7 +65,8 @@ def main():
             for p in dev.get("params", []):
                 bounds = p.get("bounds", "")
                 print(f"      {p['name']:<22} {p.get('type',''):<28} "
-                      f"{p.get('data_type',''):<6} {','.join(p.get('properties', []))} {bounds}")
+                      f"{p.get('data_type',''):<6} {p.get('ui_type') or '-':<18} "
+                      f"{','.join(p.get('properties', []))} {bounds}")
         for svc in cfg.get("services", []):
             print(f"    service '{svc['name']}' ({svc.get('type')})")
         print(f"    current values: {json.dumps(n.get('params', {}), ensure_ascii=False)}\n")
