@@ -17,11 +17,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.data[CONF_USERNAME],
         entry.data[CONF_PASSWORD],
     )
-    coordinator = SinapseCoordinator(hass, api)
+    coordinator = SinapseCoordinator(hass, entry, api)
     await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    options = dict(entry.options)
+
+    async def _async_entry_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
+        # The coordinator also saves its node cache in the entry data: only an
+        # options change needs a reload.
+        if dict(entry.options) != options:
+            await hass.config_entries.async_reload(entry.entry_id)
+
+    entry.async_on_unload(entry.add_update_listener(_async_entry_updated))
     return True
 
 

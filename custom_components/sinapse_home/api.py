@@ -47,7 +47,7 @@ class SinapseApi:
                 if resp.status >= 400:
                     raise SinapseError(f"login HTTP {resp.status}: {data}")
                 return data
-        except aiohttp.ClientError as err:
+        except (aiohttp.ClientError, TimeoutError) as err:
             raise SinapseError(f"login connection error: {err}") from err
 
     async def login(self) -> None:
@@ -99,7 +99,7 @@ class SinapseApi:
                 if resp.status >= 400:
                     raise SinapseError(f"{method} {path} HTTP {resp.status}: {data}")
                 return data or {}
-        except aiohttp.ClientError as err:
+        except (aiohttp.ClientError, TimeoutError) as err:
             raise SinapseError(f"{method} {path} connection error: {err}") from err
 
     async def get_nodes(self) -> dict[str, dict[str, Any]]:

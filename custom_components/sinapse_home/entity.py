@@ -26,6 +26,18 @@ def find_param(device: dict[str, Any], param_type: str) -> dict[str, Any] | None
     return None
 
 
+def node_device_info(coordinator: SinapseCoordinator, node_id: str) -> DeviceInfo:
+    """The HA device for one RainMaker node."""
+    info = coordinator.data[node_id].get("config", {}).get("info", {})
+    return DeviceInfo(
+        identifiers={(DOMAIN, node_id)},
+        name=info.get("name") or "Spa Sinapse",
+        manufacturer=MANUFACTURER,
+        model=info.get("type"),
+        sw_version=info.get("fw_version"),
+    )
+
+
 class SinapseEntity(CoordinatorEntity[SinapseCoordinator]):
     """Entity bound to one RainMaker device inside one node."""
 
@@ -45,15 +57,7 @@ class SinapseEntity(CoordinatorEntity[SinapseCoordinator]):
         self._dev_name: str = device["name"]
         self._attr_unique_id = f"{node_id}_{self._dev_name}_{key}"
         self._attr_name = name
-
-        info = coordinator.data[node_id].get("config", {}).get("info", {})
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, node_id)},
-            name=info.get("name") or "Spa Sinapse",
-            manufacturer=MANUFACTURER,
-            model=info.get("type"),
-            sw_version=info.get("fw_version"),
-        )
+        self._attr_device_info = node_device_info(coordinator, node_id)
 
     @property
     def _node(self) -> dict[str, Any]:
