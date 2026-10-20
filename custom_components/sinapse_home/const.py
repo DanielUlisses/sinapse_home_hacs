@@ -9,6 +9,9 @@ BASE_URL = "https://90h350n1tc.execute-api.sa-east-1.amazonaws.com/dev/v1"
 
 SCAN_INTERVAL = timedelta(seconds=30)
 REFRESH_AFTER_WRITE = 3  # seconds
+# The spa reports a change to the cloud ~20 s after a command. Until the cloud shows
+# the written value (or this expires), polls keep the value we wrote.
+PENDING_WRITE_TIMEOUT = timedelta(seconds=90)
 
 PLATFORMS = ["binary_sensor", "button", "climate", "light", "sensor", "switch"]
 

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+from datetime import datetime
 import logging
 import time
 from typing import Any
@@ -15,6 +16,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 
 from .api import SinapseApi, SinapseAuthError, SinapseError
 from .const import (
@@ -30,6 +32,7 @@ from .const import (
     LOCAL_TIMEOUT,
     P_LOCAL_CONTROL_POP,
     P_LOCAL_CONTROL_TYPE,
+    PENDING_WRITE_TIMEOUT,
     REFRESH_AFTER_WRITE,
     SCAN_INTERVAL,
     SERVICE_LOCAL_CONTROL,
@@ -43,6 +46,9 @@ from .local_protocol import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+# (node_id, device, param) -> (written value, expires at)
+PendingWrites = dict[tuple[str, str, str], tuple[Any, datetime]]
 
 
 def local_control_service(node: dict[str, Any]) -> tuple[str, str, str] | None:
@@ -112,6 +118,7 @@ class SinapseCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         self._failures: dict[str, int] = {}
         self._active: set[str] = set()
         self._shutdown = False
+        self._pending: PendingWrites = {}
 
     def connection(self, node_id: str) -> str:
         """How the node is reached right now: "local" or "cloud"."""
@@ -149,6 +156,7 @@ class SinapseCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
                     stored[device] = values
             node.setdefault("status", {}).setdefault("connectivity", {})["connected"] = True
 
+        self._apply_pending(self._nodes)
         self._async_save_cache(self._nodes)
         self.update_interval = LOCAL_SCAN_INTERVAL if self._active else SCAN_INTERVAL
         return self._nodes
@@ -339,11 +347,32 @@ class SinapseCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
                 data={**self.config_entry.data, CONF_NODE_CACHE: copy.deepcopy(cache)},
             )
 
+    def _apply_pending(self, nodes: dict[str, dict[str, Any]]) -> None:
+        """Overlay recent writes the source hasn't caught up with yet.
+
+        The spa reports a change to the cloud ~20 s after a command, so polls right
+        after a write return the old value. A write is dropped once the polled data
+        shows the same value (confirmed) or when it expires (the device never
+        applied it, so the polled value wins).
+        """
+        now = dt_util.utcnow()
+        for key, (value, expires) in list(self._pending.items()):
+            node_id, device, param = key
+            node = nodes.get(node_id)
+            if node is None:
+                del self._pending[key]
+                continue
+            params = node.setdefault("params", {}).setdefault(device, {})
+            if params.get(param) == value or now >= expires:
+                del self._pending[key]
+            else:
+                params[param] = value
+
     # --- writes ----------------------------------------------------------------
 
     async def async_set(self, node_id: str, device: str, values: dict[str, Any]) -> None:
         """Write params (LAN first, cloud when the LAN write provably didn't happen),
-        update state optimistically and re-poll shortly after."""
+        keep them as pending until a poll confirms them, and re-poll shortly after."""
         payload = {device: values}
         if not await self._async_set_local(node_id, payload):
             try:
@@ -353,6 +382,10 @@ class SinapseCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             except SinapseError as err:
                 raise UpdateFailed(str(err)) from err
             self._cloud_poll_requested = True
+
+        expires = dt_util.utcnow() + PENDING_WRITE_TIMEOUT
+        for param, value in values.items():
+            self._pending[(node_id, device, param)] = (value, expires)
 
         node = (self.data or {}).get(node_id)
         if node is not None:
