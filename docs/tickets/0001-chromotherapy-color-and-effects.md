@@ -1,6 +1,14 @@
 # 0001: Chromotherapy: color picker and effects
 
-**Status:** open
+**Status:** in-progress
+**Branch:** feat-0001-chromotherapy-color-picker-and
+**Base:** c9d6016183eab5723b9c8840698f14cb0e0600f0
+**Model:** opus
+**Effort:** medium
+**Account:** unknown
+**Worktree:** /home/daniel/work/sinapse_home_hacs--feat-0001-chromotherapy-color-picker-and
+**Agent:** tk-feat-0001-chromotherapy-color
+
 **Area:** `light.py`, `button.py`, tests
 
 ## Goal
